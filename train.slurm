@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=dcase24
 #SBATCH --comment="run training for dcase24 challenge"
-#SBATCH --account=x21zhang@imta.fr
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --time=0-5:00:00
