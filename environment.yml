@@ -1,0 +1,19 @@
+name: dcasetest
+channels:
+  - defaults
+dependencies:
+  - python
+  - ipykernel
+  - lightning
+  - pandas
+  - joblib
+  - numpy
+  - scikit-learn
+  - scipy
+  - pytorch-nightly::pytorch
+  - torchaudio
+  - torchvision
+  - pip
+  - pip:
+    - torchinfo
+    - git+https://github.com/kymatio/murenn

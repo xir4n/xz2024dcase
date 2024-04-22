@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from murenndirect import MuReNNDirect
+from murenn import MuReNNDirect
 
 
 def initialize_weights(m):
@@ -69,6 +69,20 @@ class BasicModel(nn.Module):
         x = self.l3(x)
         return x
 
+def get_model(
+        J1=8,
+        J2=4,
+        alpha=1,
+        beta=8
+):
+    config = {
+        "alpha": alpha,
+        "beta": beta, 
+        "J1": J1,
+        "J2": J2,
+    }
+    m = BasicModel(config)
+    return m
 
 if __name__ == "__main__":
     config = {
