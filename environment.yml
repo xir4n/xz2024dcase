@@ -16,4 +16,7 @@ dependencies:
   - pip
   - pip:
     - torchinfo
+    - transformers
+    - wandb
+    - librosa
     - git+https://github.com/kymatio/murenn
