@@ -3,10 +3,9 @@
 #SBATCH --comment="run training for dcase24 challenge"
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --time=0-5:00:00
+#SBATCH --time=0-1:00:00
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=60
-#SBATCH --mem-per-cpu=10g
+#SBATCH --cpus-per-task=10
 #SBATCH --gres=gpu:1
 
 # Loading Software/Libraries
