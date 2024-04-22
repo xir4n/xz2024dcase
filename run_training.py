@@ -203,6 +203,7 @@ def train(config):
     shape = next(iter(test_dl))[0][0].unsqueeze(0).size()
     # shape = pl_module.forward(sample).size()
     macs, params = nessi.get_torch_size(pl_module.model, input_size=shape)
+    wandb.login(key='62984588470455102b7d01851cb6fe9b869fe016')
     # log MACs and number of parameters for our model
     wandb_logger.experiment.config['MACs'] = macs
     wandb_logger.experiment.config['Parameters'] = params
@@ -262,7 +263,7 @@ if __name__ == '__main__':
     parser.add_argument('--J2', type=int, default=4)
 
     # training
-    parser.add_argument('--sav_dir', type=str, default="../log")
+    parser.add_argument('--sav_dir', type=str, default="./log")
     parser.add_argument('--n_epochs', type=int, default=150)
     parser.add_argument('--batch_size', type=int, default=512)
     parser.add_argument('--mixstyle_p', type=float, default=0)  # frequency mixstyle
