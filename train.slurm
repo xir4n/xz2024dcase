@@ -7,6 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=10
 #SBATCH --gres=gpu:1
+#SBATCH --qos=short
 
 # Loading Software/Libraries
 module purge
