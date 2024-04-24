@@ -12,7 +12,6 @@ import os
 from dataset.dcase24 import get_training_set, get_test_set, get_eval_set
 from helpers.init import worker_init_fn
 from models.basic import get_model
-from helpers.utils import mixstyle
 from helpers import nessi
 
 
@@ -25,6 +24,8 @@ class PLModule(pl.LightningModule):
             J2=config.J2,
             alpha=config.alpha,
             beta=config.beta,
+            mixstyle_p = config.mixstyle_p,
+            mixstyle_alpha = config.mixstyle_alpha,
         )
     
         self.device_ids = ['a', 'b', 'c', 's1', 's2', 's3', 's4', 's5', 's6']
@@ -69,9 +70,9 @@ class PLModule(pl.LightningModule):
         # training_step defines the train loop.
         x, files, labels, devices, cities = batch
 
-        if self.config.mixstyle_p > 0:
-            # frequency mixstyle
-            x = mixstyle(x, self.config.mixstyle_p, self.config.mixstyle_alpha)
+        # if self.config.mixstyle_p > 0:
+        #     # frequency mixstyle
+        #     x = mixstyle(x, self.config.mixstyle_p, self.config.mixstyle_alpha)
         y_hat = self.model(x)
         samples_loss = F.cross_entropy(y_hat, labels, reduction="none")
         loss = samples_loss.mean()
@@ -185,7 +186,12 @@ def train(config):
     assert config.subset in {100, 50, 25, 10, 5}, "Specify an integer value in: {100, 50, 25, 10, 5} to use one of " \
                                                   "the given subsets."
     roll_samples = config.roll_sec * 44100
-    train_dl = DataLoader(dataset=get_training_set(config.subset, roll=roll_samples),
+    dataset = get_training_set(
+        split=config.subset,
+        roll=roll_samples,
+        dir_prob=config.dir_prob,
+    )
+    train_dl = DataLoader(dataset,
                           worker_init_fn=worker_init_fn,
                           num_workers=config.num_workers,
                           batch_size=config.batch_size,
@@ -203,6 +209,7 @@ def train(config):
     shape = next(iter(test_dl))[0][0].unsqueeze(0).size()
     # shape = pl_module.forward(sample).size()
     macs, params = nessi.get_torch_size(pl_module.model, input_size=shape)
+    nessi.validate(macs, params)
     wandb.login(key='62984588470455102b7d01851cb6fe9b869fe016')
     # log MACs and number of parameters for our model
     wandb_logger.experiment.config['MACs'] = macs
@@ -262,14 +269,18 @@ if __name__ == '__main__':
     parser.add_argument('--J1', type=int, default=8)
     parser.add_argument('--J2', type=int, default=4)
 
+    # augmentation
+    parser.add_argument('--mixstyle_p', type=float, default=0.5)  # mixstyle
+    parser.add_argument('--mixstyle_alpha', type=float, default=0.2)
+    parser.add_argument('--roll_sec', type=int, default=0)  # roll waveform over time
+    parser.add_argument('--dir_prob', type=float, default=0.4) # prob. to apply device impulse response augmentation
+
+
     # training
     parser.add_argument('--sav_dir', type=str, default="./log")
     parser.add_argument('--n_epochs', type=int, default=150)
-    parser.add_argument('--batch_size', type=int, default=512)
-    parser.add_argument('--mixstyle_p', type=float, default=0)  # frequency mixstyle
-    parser.add_argument('--mixstyle_alpha', type=float, default=0.3)
+    parser.add_argument('--batch_size', type=int, default=1024)
     parser.add_argument('--weight_decay', type=float, default=0.0001)
-    parser.add_argument('--roll_sec', type=int, default=0.1)  # roll waveform over time
     parser.add_argument('--fast_dev_run', type=bool, default=False) 
 
     # peak learning rate (in cosinge schedule)

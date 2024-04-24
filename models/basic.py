@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from murenn import MuReNNDirect
+from .mixstyle import MixStyle
 
 
 def initialize_weights(m):
@@ -24,6 +25,9 @@ class BasicModel(nn.Module):
         J2 = config["J2"]
         Q2 = config["alpha"]
         T2 = config["beta"]
+        mixstyle_p = config["mixstyle_p"]
+        mixstyle_alpha = config["mixstyle_alpha"]
+
 
         self.l1 = MuReNNDirect(
             J=J1,
@@ -56,11 +60,14 @@ class BasicModel(nn.Module):
             nn.Softmax(dim=1),
         )
 
+        self.mixstyle = MixStyle(p=mixstyle_p, alpha=mixstyle_alpha)
+
         self.apply(initialize_weights)
 
 
     def forward(self, x):
         x = self.l1(x)
+        x = self.mixstyle(x)
         B, C, Q, J, _ = x.shape
         x = x.view(B, C * Q * J, -1)
         x = self.l2(x)
@@ -73,13 +80,17 @@ def get_model(
         J1=8,
         J2=4,
         alpha=1,
-        beta=8
+        beta=8,
+        mixstyle_p=0.5,
+        mixstyle_alpha=0.2,
 ):
     config = {
         "alpha": alpha,
         "beta": beta, 
         "J1": J1,
         "J2": J2,
+        "mixstyle_p": mixstyle_p,
+        "mixstyle_alpha": mixstyle_alpha,
     }
     m = BasicModel(config)
     return m
@@ -90,6 +101,8 @@ if __name__ == "__main__":
         "beta": 8, 
         "J1": 8,
         "J2": 4,
+        "mixstyle_p": 0.5,
+        "mixstyle_alpha": 0.2,
     }
     x = torch.zeros(1, 1, 2**14)
     m = BasicModel(config)
