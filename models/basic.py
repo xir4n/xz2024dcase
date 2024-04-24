@@ -21,11 +21,10 @@ class BasicModel(nn.Module):
         J1 = config["J1"]
         Q1 = config["alpha"]
         T1 = config["beta"]
-        # C = config["beta"]
-        C = 1
+        C = config["beta"]
         J2 = config["J2"]
         Q2 = config["alpha"]
-        T2 = config["beta"]
+        T2 = 1
         mixstyle_p = config["mixstyle_p"]
         mixstyle_alpha = config["mixstyle_alpha"]
 
