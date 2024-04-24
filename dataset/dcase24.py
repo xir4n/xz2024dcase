@@ -87,10 +87,10 @@ class DIRAugmentDataset(TorchDataset):
     def __getitem__(self, index):
         x, file, label, device, city = self.ds[index]
 
-        # fsplit = file.rsplit("-", 1)
-        # device = fsplit[1][:-4]
+        fsplit = file.rsplit("-", 1)
+        device = fsplit[1][:-4]
 
-        if device in [0, 1, 2] and torch.rand(1) < self.prob:
+        if device == "a" and torch.rand(1) < self.prob:
             # choose a DIR at random
             dir_idx = int(np.random.randint(0, len(self.dirs)))
             dir = self.dirs[dir_idx]
@@ -117,7 +117,6 @@ def load_dirs(dirs_path):
 
     def process_func(dir_file):
         # sig, _ = librosa.load(dir_file, sr=resample_rate, mono=True)
-        print(dir_file)
         sig, _ = torchaudio.load(dir_file)
         # sig = torch.from_numpy(sig[np.newaxis])
         return sig
