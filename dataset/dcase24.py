@@ -117,6 +117,7 @@ def load_dirs(dirs_path):
 
     def process_func(dir_file):
         # sig, _ = librosa.load(dir_file, sr=resample_rate, mono=True)
+        print(dir_file)
         sig, _ = torchaudio.load(dir_file)
         # sig = torch.from_numpy(sig[np.newaxis])
         return sig
