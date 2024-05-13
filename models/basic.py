@@ -15,15 +15,15 @@ def initialize_weights(m):
             nn.init.zeros_(m.bias)
 
 
-class BasicModel(nn.Module):
+class MuReNNClassifier(nn.Module):
     def __init__(self, config):
         super().__init__()
         J1 = config["J1"]
         Q1 = config["alpha"]
         T1 = config["beta"]
-        C = config["beta"]
+        C =  config["beta"]*config["n"]                  # config["beta"]
         J2 = config["J2"]
-        Q2 = config["alpha"]
+        Q2 = config["alpha"]*config["m"]      #config["beta"]
         T2 = 1
         mixstyle_p = config["mixstyle_p"]
         mixstyle_alpha = config["mixstyle_alpha"]
@@ -79,33 +79,37 @@ class BasicModel(nn.Module):
 def get_model(
         J1=8,
         J2=4,
-        alpha=1,
+        alpha=42,
         beta=8,
+        m=5,
+        n=1,
         mixstyle_p=0.5,
         mixstyle_alpha=0.2,
 ):
     config = {
         "alpha": alpha,
         "beta": beta, 
+        "m": m,
+        "n": n,
         "J1": J1,
         "J2": J2,
         "mixstyle_p": mixstyle_p,
         "mixstyle_alpha": mixstyle_alpha,
     }
-    m = BasicModel(config)
-    return m
+    model = MuReNNClassifier(config)
+    return model
 
-if __name__ == "__main__":
-    config = {
-        "alpha": 1,
-        "beta": 8, 
-        "J1": 8,
-        "J2": 4,
-        "mixstyle_p": 0.5,
-        "mixstyle_alpha": 0.2,
-    }
-    x = torch.zeros(1, 1, 2**14)
-    m = BasicModel(config)
-    m.eval()
-    y = m(x)
-    print(y.shape)
+# if __name__ == "__main__":
+#     config = {
+#         "alpha": 1,
+#         "beta": 8, 
+#         "J1": 8,
+#         "J2": 4,
+#         "mixstyle_p": 0.5,
+#         "mixstyle_alpha": 0.2,
+#     }
+#     x = torch.zeros(1, 1, 2**14)
+#     m = BasicModel(config)
+#     m.eval()
+#     y = m(x)
+#     print(y.shape)

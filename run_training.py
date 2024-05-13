@@ -22,6 +22,8 @@ class PLModule(pl.LightningModule):
         self.model = get_model(
             J1=config.J1,
             J2=config.J2,
+            m=config.m,
+            n=config.n,
             alpha=config.alpha,
             beta=config.beta,
             mixstyle_p = config.mixstyle_p,
@@ -264,8 +266,10 @@ if __name__ == '__main__':
     parser.add_argument('--subset', type=int, default=100)
 
     # model
-    parser.add_argument('--alpha', type=int, default=1)
+    parser.add_argument('--alpha', type=int, default=42)
     parser.add_argument('--beta', type=int, default=8)
+    parser.add_argument('--m', type=int, default=5)
+    parser.add_argument('--n', type=int, default=1)
     parser.add_argument('--J1', type=int, default=8)
     parser.add_argument('--J2', type=int, default=4)
 

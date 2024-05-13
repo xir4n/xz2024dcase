@@ -3,7 +3,7 @@
 #SBATCH --comment="run training for dcase24 challenge"
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --time=0-4:00:00
+#SBATCH --time=0-12:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=10
 #SBATCH --gres=gpu:1
@@ -18,5 +18,5 @@ source ~/.bashrc
 micromamba activate dcase
 
 # Run code
-cd /scratch/nautilus/users/x21zhang@imta.fr/xz2024dcase
-python run_training.py --ckpt_id 1 
+cd /scratch/nautilus/users/cz7tygkr@cnrs.fr/xz2024dcase
+python run_training.py --experiment_name b16n4 --num_workers 30 --alpha 20 --beta 16 --m 1 --n 4 --n_epochs 150
