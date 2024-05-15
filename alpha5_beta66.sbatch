@@ -15,5 +15,5 @@ module purge
 module load anaconda-py3/2023.09
 
 conda activate dcase
-python /Users/zhang/dcase2024/run_training.py --project_name structure_alpha_beta --experiment_name alpha5_beta66 --subset 10 --alpha 5 --beta 66 --sav_dir ./structure_alpha_beta --fast_dev_run True --batch_size 1
+python run_training.py --project_name structure_alpha_beta --experiment_name alpha5_beta66 --subset 10 --alpha 5 --beta 66 --sav_dir ./structure_alpha_beta --fast_dev_run True --batch_size 1
 
