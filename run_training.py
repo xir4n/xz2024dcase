@@ -72,9 +72,6 @@ class PLModule(pl.LightningModule):
         # training_step defines the train loop.
         x, files, labels, devices, cities = batch
 
-        # if self.config.mixstyle_p > 0:
-        #     # frequency mixstyle
-        #     x = mixstyle(x, self.config.mixstyle_p, self.config.mixstyle_alpha)
         y_hat = self.model(x)
         samples_loss = F.cross_entropy(y_hat, labels, reduction="none")
         loss = samples_loss.mean()
@@ -221,13 +218,14 @@ def train(config):
     # on which kind of device(s) to train and possible callbacks
     if config.fast_dev_run:
         trainer = pl.Trainer(
-             logger=wandb_logger,
-             accelerator='gpu',
+            #  logger=wandb_logger,
+             accelerator="auto",
              devices=1,
              precision=config.precision,
              fast_dev_run=True,
              num_sanity_val_steps=2,
              profiler="simple",
+             limit_train_batches=1,
         )
     else:   
         trainer = pl.Trainer(max_epochs=config.n_epochs,
@@ -268,7 +266,7 @@ if __name__ == '__main__':
     # model
     parser.add_argument('--alpha', type=int, default=42)
     parser.add_argument('--beta', type=int, default=8)
-    parser.add_argument('--m', type=int, default=5)
+    parser.add_argument('--m', type=int, default=1)
     parser.add_argument('--n', type=int, default=1)
     parser.add_argument('--J1', type=int, default=8)
     parser.add_argument('--J2', type=int, default=4)

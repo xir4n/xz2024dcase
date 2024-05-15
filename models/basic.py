@@ -99,17 +99,19 @@ def get_model(
     model = MuReNNClassifier(config)
     return model
 
-# if __name__ == "__main__":
-#     config = {
-#         "alpha": 1,
-#         "beta": 8, 
-#         "J1": 8,
-#         "J2": 4,
-#         "mixstyle_p": 0.5,
-#         "mixstyle_alpha": 0.2,
-#     }
-#     x = torch.zeros(1, 1, 2**14)
-#     m = BasicModel(config)
-#     m.eval()
-#     y = m(x)
-#     print(y.shape)
+if __name__ == "__main__":
+    config = {
+        "alpha": 42,
+        "beta": 8, 
+        "J1": 8,
+        "J2": 4,
+        "m": 1,
+        "n": 1,
+        "mixstyle_p": 0.5,
+        "mixstyle_alpha": 0.2,
+    }
+    x = torch.zeros(1, 1, 2**14)
+    m = MuReNNClassifier(config)
+    m.eval()
+    y = m(x)
+    print(y.shape)
