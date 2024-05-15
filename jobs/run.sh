@@ -1,5 +1,0 @@
-sbatch "jobs/b8n1.sbatch"
-sbatch "jobs/b8n2.sbatch"
-sbatch "jobs/b8n4.sbatch"
-sbatch "jobs/b16n1.sbatch"
-sbatch "jobs/b16n2.sbatch"
