@@ -209,7 +209,8 @@ def train(config):
     # shape = pl_module.forward(sample).size()
     macs, params = nessi.get_torch_size(pl_module.model, input_size=shape)
     nessi.validate(macs, params)
-    wandb.login(key='62984588470455102b7d01851cb6fe9b869fe016')
+    # wandb.init(settings=wandb.Settings(start_method="fork"))
+    # wandb.login(key='62984588470455102b7d01851cb6fe9b869fe016')
     # log MACs and number of parameters for our model
     wandb_logger.experiment.config['MACs'] = macs
     wandb_logger.experiment.config['Parameters'] = params
