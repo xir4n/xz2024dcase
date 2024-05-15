@@ -10,7 +10,7 @@ subset = 10
 betas = [5, 10, 15, 18, 22, 33, 66]
 
 # Create folder.
-sbatch_dir = os.path.join(os.path.dirname(__file__), project_name)
+sbatch_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), project_name)
 os.makedirs(sbatch_dir, exist_ok=True)
 
 for beta in betas:
