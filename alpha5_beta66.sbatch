@@ -8,7 +8,7 @@
 #SBATCH --hint=nomultithread
 #SBATCH --time=20:00:00
 #SBATCH --output=alpha5_beta66_%j.out
-#SBATCH --account=xyz@a100
+#SBATCH --account=nvz@v100
 
 module purge
 
