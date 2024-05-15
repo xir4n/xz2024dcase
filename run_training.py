@@ -179,6 +179,7 @@ def train(config):
         config=config,  # this logs all hyperparameters for us
         name=config.experiment_name,
         save_dir=config.sav_dir,
+        offline=True,
     )
 
     # train dataloader
@@ -206,11 +207,8 @@ def train(config):
 
     # get model complexity from nessi and log results to wandb
     shape = next(iter(test_dl))[0][0].unsqueeze(0).size()
-    # shape = pl_module.forward(sample).size()
     macs, params = nessi.get_torch_size(pl_module.model, input_size=shape)
     nessi.validate(macs, params)
-    # wandb.init(settings=wandb.Settings(start_method="fork"))
-    # wandb.login(key='62984588470455102b7d01851cb6fe9b869fe016')
     # log MACs and number of parameters for our model
     wandb_logger.experiment.config['MACs'] = macs
     wandb_logger.experiment.config['Parameters'] = params
@@ -219,7 +217,6 @@ def train(config):
     # on which kind of device(s) to train and possible callbacks
     if config.fast_dev_run:
         trainer = pl.Trainer(
-            #  logger=wandb_logger,
              accelerator="auto",
              devices=1,
              precision=config.precision,
@@ -243,7 +240,6 @@ def train(config):
 
     # final test step
     # here: use the validation split
-    # trainer.test(ckpt_path='last', dataloaders=test_dl)
     wandb.finish()
     
 
