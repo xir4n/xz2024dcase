@@ -3,7 +3,7 @@ import os
 # Define constants.
 script_name = "run_training"
 script_path = os.path.abspath(os.path.join("..", script_name)) + ".py"
-batch_size = 1024
+batch_size = 512
 project_name = os.path.basename(__file__)[:-3]
 subset = 10
 
@@ -30,11 +30,13 @@ for beta in betas:
             f"--alpha {alpha}",
             f"--beta {beta}",
             f"--sav_dir {sav_dir}",
+            f"--batch_size {batch_size}",
         ]
         f.write("#!/bin/bash\n")
         f.write("\n")
         f.write("#BATCH --job-name=" + experiment_name + "\n")
         f.write("#SBATCH --nodes=1\n")
+        f.write("#SBATCH -C v100-32g\n")
         f.write("#SBATCH --tasks-per-node=1\n")
         f.write("#SBATCH --gres=gpu:1\n")
         f.write("#SBATCH --cpus-per-task=10\n")

@@ -10,7 +10,7 @@ from torch.hub import download_url_to_file
 import numpy as np
 import librosa
 
-dataset_dir = "../data"
+dataset_dir = None
 assert dataset_dir is not None, "Specify 'TAU Urban Acoustic Scenes 2024 Mobile dataset' location in variable " \
                                 "'dataset_dir'. The dataset can be downloaded from this URL:" \
                                 " https://zenodo.org/record/6337421"
@@ -158,6 +158,7 @@ def get_training_set(split=100, roll=False, dir_prob=0):
         print(f"Downloading file: {subset_fname}")
         download_url_to_file(subset_csv_url, subset_split_file)
     ds = get_base_training_set(dataset_config['meta_csv'], subset_split_file)
+    
     if dir_prob > 0:
         ds = DIRAugmentDataset(ds, load_dirs(dataset_config['dirs_path']), dir_prob)
     if roll:
