@@ -3,7 +3,7 @@ import os
 # Define constants.
 script_name = "run_training"
 script_path = os.path.abspath(os.path.join("..", script_name)) + ".py"
-batch_size = 1024
+batch_size = 512
 project_name = os.path.basename(__file__)[:-3]
 subset = 10
 
@@ -30,25 +30,27 @@ for beta in betas:
             f"--alpha {alpha}",
             f"--beta {beta}",
             f"--sav_dir {sav_dir}",
+            f"--batch_size {batch_size}",
         ]
         f.write("#!/bin/bash\n")
         f.write("\n")
         f.write("#BATCH --job-name=" + experiment_name + "\n")
         f.write("#SBATCH --nodes=1\n")
+        f.write("#SBATCH -C v100-32g\n")
         f.write("#SBATCH --tasks-per-node=1\n")
         f.write("#SBATCH --gres=gpu:1\n")
         f.write("#SBATCH --cpus-per-task=10\n")
         f.write("#SBATCH --hint=nomultithread\n")
 
         f.write("#SBATCH --time=20:00:00\n")
-        f.write("#SBATCH --account=nvz@v100")
+        f.write("#SBATCH --account=nvz@v100\n")
         f.write("#SBATCH --output=" + experiment_name + "_%j.out\n")
         f.write("\n")
         f.write("module purge\n")
         f.write("\n")
         f.write("module load anaconda-py3/2023.09\n")
         f.write("\n")
-        f.write("export PATH=$WORK/.local/bin:$PATH")
+        f.write("export PATH=$WORK/.local/bin:$PATH\n")
         f.write("conda activate dcase\n")
         f.write(" ".join(["python"] + cmd_args) + "\n")
         f.write("\n")

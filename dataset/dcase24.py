@@ -10,7 +10,7 @@ from torch.hub import download_url_to_file
 import numpy as np
 import librosa
 
-dataset_dir = "../data"
+dataset_dir = "/gpfsscratch/rech/nvz/ufy95rl/dcase/xz2024dcase/data"
 assert dataset_dir is not None, "Specify 'TAU Urban Acoustic Scenes 2024 Mobile dataset' location in variable " \
                                 "'dataset_dir'. The dataset can be downloaded from this URL:" \
                                 " https://zenodo.org/record/6337421"
