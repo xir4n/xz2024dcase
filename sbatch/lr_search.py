@@ -13,8 +13,10 @@ lrs = [0.1, 0.08, 0.05, 0.03, 0.01, 0.001]
 sbatch_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), project_name)
 os.makedirs(sbatch_dir, exist_ok=True)
 
+experiment_names = []
 for lr in lrs:
-    experiment_name = f"lr_{lr}"
+    experiment_name = f"lr_{int(lr*1000)}"
+    experiment_names.append(experiment_name)
     file_name = experiment_name + ".sbatch"
     file_path = os.path.join(sbatch_dir, file_name)
     sav_dir = os.path.join("./log", project_name)
@@ -66,13 +68,18 @@ with open(file_path, "w") as f:
         "# Find "
     )
     f.write("\n")
-    for lr in lrs:
-        experiment_name = f"lr_{lr}"
+    for experiment_name in experiment_names:
         file_name = experiment_name + ".sbatch"
         file_path = os.path.join(sbatch_dir, file_name)
         sbatch_str = "sbatch " + file_path
-        # Write SBATCH command to shell file.
         f.write(sbatch_str + "\n")
+    # for lr in lrs:
+    #     experiment_name = f"lr_{lr}"
+    #     file_name = experiment_name + ".sbatch"
+    #     file_path = os.path.join(sbatch_dir, file_name)
+    #     sbatch_str = "sbatch " + file_path
+    #     # Write SBATCH command to shell file.
+    #     f.write(sbatch_str + "\n")
 
 # Grant permission to execute the shell file.
 # https://stackoverflow.com/a/30463972
