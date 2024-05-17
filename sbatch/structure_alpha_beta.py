@@ -5,9 +5,9 @@ script_name = "run_training"
 script_path = os.path.abspath(os.path.join("..", script_name)) + ".py"
 batch_size = 512
 project_name = os.path.basename(__file__)[:-3]
-subset = 10
+subset = 5
 
-betas = [5, 10, 15, 18, 22, 33, 66]
+betas = [1, 2, 3, 5, 10, 15, 18, 22, 33, 66, 110, 150, 330]
 
 # Create folder.
 sbatch_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), project_name)
@@ -31,6 +31,7 @@ for beta in betas:
             f"--beta {beta}",
             f"--sav_dir {sav_dir}",
             f"--batch_size {batch_size}",
+            f"--warmup_steps 0",
         ]
         f.write("#!/bin/bash\n")
         f.write("\n")
