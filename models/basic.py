@@ -53,6 +53,9 @@ class MuReNNClassifier(nn.Module):
         )
 
         self.l3 = nn.Sequential(
+            nn.BatchNorm1d(
+                num_features=C*Q2
+            ),
             nn.Linear(
                 in_features=C*Q2,
                 out_features=10,
