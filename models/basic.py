@@ -38,11 +38,11 @@ class MuReNNClassifier(nn.Module):
 
         self.l2 = nn.Sequential(
             nn.Conv1d(
-                in_channels=Q1*J1,
+                in_channels=Q1*(J1+1),
                 out_channels=C,
                 kernel_size=1,
                 padding="same",
-                bias=False, 
+                bias=False, #True?
             ),
             MuReNNDirect(
                 J=J2,
