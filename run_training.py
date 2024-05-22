@@ -49,7 +49,12 @@ class PLModule(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(
+        # optimizer = torch.optim.AdamW(
+        #     self.parameters(),
+        #     lr=self.config.lr,
+        #     weight_decay=self.config.weight_decay,
+        # )
+        optimizer = torch.optim.SGD(
             self.parameters(),
             lr=self.config.lr,
             weight_decay=self.config.weight_decay,
