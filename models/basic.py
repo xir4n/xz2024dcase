@@ -21,9 +21,9 @@ class MuReNNClassifier(nn.Module):
         J1 = config["J1"]
         Q1 = config["alpha"]
         T1 = config["beta"]
-        C =  config["beta"]*config["n"]                  # config["beta"]
+        C =  config["beta"]*config["n"]
         J2 = config["J2"]
-        Q2 = config["alpha"]*config["m"]      #config["beta"]
+        Q2 = config["alpha"]*config["m"]
         T2 = 1
         mixstyle_p = config["mixstyle_p"]
         mixstyle_alpha = config["mixstyle_alpha"]
@@ -60,6 +60,13 @@ class MuReNNClassifier(nn.Module):
             nn.Softmax(dim=1),
         )
 
+        self.conv3 = nn.Conv1d(
+            in_channels=J2+1,
+            out_channels=1,
+            kernel_size=1,
+            padding="same",
+            bias=False,
+        )
         self.mixstyle = MixStyle(p=mixstyle_p, alpha=mixstyle_alpha)
 
         self.apply(initialize_weights)
@@ -68,10 +75,14 @@ class MuReNNClassifier(nn.Module):
     def forward(self, x):
         x = self.l1(x)
         x = self.mixstyle(x)
-        B, C, Q, J, _ = x.shape
-        x = x.view(B, C * Q * J, -1)
+        B, C, Q, J, T = x.shape
+        x = x.view(B, C * Q * J, T)
         x = self.l2(x)
-        x = torch.sum(x, dim=(4, 3))
+        B, C, Q, J, T = x.shape
+        x = x.view(B*C*Q, J, T)
+        x = self.conv3(x)
+        x = x.view(B, C*Q, T)
+        x = torch.sum(x, dim=-1)
         x = x.view(B, -1)
         x = self.l3(x)
         return x
@@ -100,18 +111,8 @@ def get_model(
     return model
 
 if __name__ == "__main__":
-    config = {
-        "alpha": 42,
-        "beta": 8, 
-        "J1": 8,
-        "J2": 4,
-        "m": 1,
-        "n": 1,
-        "mixstyle_p": 0.5,
-        "mixstyle_alpha": 0.2,
-    }
     x = torch.zeros(1, 1, 2**14)
-    m = MuReNNClassifier(config)
+    m = get_model()
     m.eval()
     y = m(x)
     print(y.shape)
