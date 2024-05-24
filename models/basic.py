@@ -38,11 +38,11 @@ class MuReNNClassifier(nn.Module):
 
         self.l2 = nn.Sequential(
             nn.Conv1d(
-                in_channels=Q1*(J1+1),
+                in_channels=Q1*J1,
                 out_channels=C,
                 kernel_size=1,
                 padding="same",
-                bias=False, #True?
+                bias=False,
             ),
             MuReNNDirect(
                 J=J2,
@@ -53,23 +53,22 @@ class MuReNNClassifier(nn.Module):
         )
 
         self.l3 = nn.Sequential(
-            nn.BatchNorm1d(
-                num_features=C*Q2
-            ),
+            # nn.BatchNorm1d(
+            #     num_features=C*Q2
+            # ),
             nn.Linear(
                 in_features=C*Q2,
                 out_features=10,
             ),
-            nn.Softmax(dim=1),
         )
 
-        self.conv3 = nn.Conv1d(
-            in_channels=J2+1,
-            out_channels=1,
-            kernel_size=1,
-            padding="same",
-            bias=False,
-        )
+        # self.conv3 = nn.Conv1d(
+        #     in_channels=J2,
+        #     out_channels=1,
+        #     kernel_size=1,
+        #     padding="same",
+        #     bias=False,
+        # )
         self.mixstyle = MixStyle(p=mixstyle_p, alpha=mixstyle_alpha)
 
         self.apply(initialize_weights)
@@ -82,10 +81,11 @@ class MuReNNClassifier(nn.Module):
         x = x.view(B, C * Q * J, T)
         x = self.l2(x)
         B, C, Q, J, T = x.shape
-        x = x.view(B*C*Q, J, T)
-        x = self.conv3(x)
-        x = x.view(B, C*Q, T)
-        x = torch.sum(x, dim=-1)
+        # x = x.view(B*C*Q, J, T)
+        # x = self.conv3(x)
+        # x = x.view(B, C*Q, T)
+        # x = torch.sum(x, dim=-1)
+        x = torch.sum(x, dim=[-1,-2])
         x = x.view(B, -1)
         x = self.l3(x)
         return x
