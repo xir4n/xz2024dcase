@@ -28,6 +28,7 @@ class PLModule(pl.LightningModule):
             beta=config.beta,
             mixstyle_p = config.mixstyle_p,
             mixstyle_alpha = config.mixstyle_alpha,
+            skip_lp=config.skip_lp
         )
     
         self.device_ids = ['a', 'b', 'c', 's1', 's2', 's3', 's4', 's5', 's6']
@@ -212,6 +213,7 @@ def train(config):
     # log MACs and number of parameters for our model
     wandb_logger.experiment.config['MACs'] = macs
     wandb_logger.experiment.config['Parameters'] = params
+    wandb_logger.watch(pl_module, log_freq=50)
 
     # create the pytorch lightening trainer by specifying the number of epochs to train, the logger,
     # on which kind of device(s) to train and possible callbacks
@@ -261,12 +263,13 @@ if __name__ == '__main__':
     parser.add_argument('--subset', type=int, default=100)
 
     # model
-    parser.add_argument('--alpha', type=int, default=42)
-    parser.add_argument('--beta', type=int, default=8)
+    parser.add_argument('--alpha', type=int, default=33)
+    parser.add_argument('--beta', type=int, default=10)
     parser.add_argument('--m', type=int, default=1)
     parser.add_argument('--n', type=int, default=1)
     parser.add_argument('--J1', type=int, default=8)
     parser.add_argument('--J2', type=int, default=4)
+    parser.add_argument('--skip_lp', type=bool, default=True)
 
     # augmentation
     parser.add_argument('--mixstyle_p', type=float, default=0.5)  # mixstyle

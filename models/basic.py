@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from murenn import MuReNNDirect
+from murenn import MuReNNDirect, DTCWT
 from .mixstyle import MixStyle
 
 
@@ -15,7 +15,7 @@ def initialize_weights(m):
             nn.init.zeros_(m.bias)
 
 
-class MuReNNClassifier(nn.Module):
+class Basic(nn.Module):
     def __init__(self, config):
         super().__init__()
         J1 = config["J1"]
@@ -27,78 +27,85 @@ class MuReNNClassifier(nn.Module):
         T2 = 1
         mixstyle_p = config["mixstyle_p"]
         mixstyle_alpha = config["mixstyle_alpha"]
+        self.skip_lp = config["skip_lp"]
 
 
-        self.l1 = MuReNNDirect(
+        self.layer1 = MuReNNDirect(
             J=J1,
             Q=Q1,
             T=T1,
             in_channels=1,
         )
 
-        self.l2 = nn.Sequential(
-            nn.Conv1d(
-                in_channels=Q1*J1,
-                out_channels=C,
-                kernel_size=1,
-                padding="same",
-                bias=False,
-            ),
-            MuReNNDirect(
+        self.dirac = nn.Conv1d(
+            in_channels=Q1*J1,
+            out_channels=C,
+            kernel_size=1,
+            padding="same",
+            bias=False,           
+        )
+
+        if not self.skip_lp:
+            self.phi2 = DTCWT(
+                J=J2+1,
+                padding_mode="symmetric",
+                skip_hps=True,
+                normalize=True,
+            )
+            self.layer2 = MuReNNDirect(
                 J=J2,
                 Q=Q2,
                 T=T2,
                 in_channels=C,
-            ),
-        )
-
-        self.l3 = nn.Sequential(
-            # nn.BatchNorm1d(
-            #     num_features=C*Q2
-            # ),
-            nn.Linear(
-                in_features=C*Q2,
+            )
+            self.fc = nn.Linear(
+                in_features=C*(Q2*J2+1), # This is too big
                 out_features=10,
-            ),
-        )
+            )
 
-        # self.conv3 = nn.Conv1d(
-        #     in_channels=J2,
-        #     out_channels=1,
-        #     kernel_size=1,
-        #     padding="same",
-        #     bias=False,
-        # )
+        else:
+            self.layer2 = MuReNNDirect(
+                J=J2,
+                Q=Q2,
+                T=T2,
+                in_channels=C,
+            )
+            self.fc = nn.Linear(
+                in_features=C*Q2*J2, # This is too big
+                out_features=10,
+            )
+
         self.mixstyle = MixStyle(p=mixstyle_p, alpha=mixstyle_alpha)
-
         self.apply(initialize_weights)
 
 
     def forward(self, x):
-        x = self.l1(x)
+        x = self.layer1(x)
         x = self.mixstyle(x)
         B, C, Q, J, T = x.shape
         x = x.view(B, C * Q * J, T)
-        x = self.l2(x)
-        B, C, Q, J, T = x.shape
-        # x = x.view(B*C*Q, J, T)
-        # x = self.conv3(x)
-        # x = x.view(B, C*Q, T)
-        # x = torch.sum(x, dim=-1)
-        x = torch.sum(x, dim=[-1,-2])
-        x = x.view(B, -1)
-        x = self.l3(x)
+        x = self.dirac(x)
+        x_psis = self.layer2(x) #B, C, Q2, J2, T
+        B, C, Q, J, T = x_psis.shape
+        x_psis = x_psis.view(B, C * Q * J, T) # B, C*Q2*J2, T
+        if not self.skip_lp:
+            x_phi, _ = self.phi2(x) #B, C, T 
+            x = torch.cat((x_psis, x_phi), 1) # B, C*(Q2*J2+1), T
+        x_psis = torch.sum(x_psis, dim=-1)
+        x = self.fc(x_psis)
         return x
+
 
 def get_model(
         J1=8,
         J2=4,
-        alpha=42,
-        beta=8,
+        alpha=10,
+        beta=30,
         m=5,
         n=1,
         mixstyle_p=0.5,
         mixstyle_alpha=0.2,
+        skip_lp=True,
 ):
     config = {
         "alpha": alpha,
@@ -109,9 +116,10 @@ def get_model(
         "J2": J2,
         "mixstyle_p": mixstyle_p,
         "mixstyle_alpha": mixstyle_alpha,
+        "skip_lp": skip_lp,
     }
-    model = MuReNNClassifier(config)
-    return model
+    m = Basic(config)
+    return m
 
 if __name__ == "__main__":
     x = torch.zeros(1, 1, 2**14)
