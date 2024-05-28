@@ -87,13 +87,13 @@ class Basic(nn.Module):
         x = self.dirac(x)
         x_psis = self.layer2(x) #B, C, Q2, J2, T
         B, C, Q, J, T = x_psis.shape
-        x_psis = x_psis.view(B, C * Q * J, T) # B, C*Q2*J2, T
+        y = x_psis.view(B, C * Q * J, T) # B, C*Q2*J2, T
         if not self.skip_lp:
             x_phi, _ = self.phi2(x) #B, C, T 
-            x = torch.cat((x_psis, x_phi), 1) # B, C*(Q2*J2+1), T
-        x_psis = torch.sum(x_psis, dim=-1)
-        x = self.fc(x_psis)
-        return x
+            y = torch.cat((y, x_phi), 1) # B, C*(Q2*J2+1), T
+        y = torch.sum(y, dim=-1)
+        logits = self.fc(y)
+        return logits
 
 
 def get_model(
