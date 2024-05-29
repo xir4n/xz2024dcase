@@ -8,10 +8,10 @@ import torch
 import torchaudio
 from torch.hub import download_url_to_file
 import numpy as np
-import librosa
 
 
 dataset_dir = "/gpfsscratch/rech/nvz/ufy95rl/dcase/xz2024dcase/data"
+# dataset_dir = "../data"
 
 assert dataset_dir is not None, "Specify 'TAU Urban Acoustic Scenes 2024 Mobile dataset' location in variable " \
                                 "'dataset_dir'. The dataset can be downloaded from this URL:" \
@@ -89,10 +89,10 @@ class DIRAugmentDataset(TorchDataset):
     def __getitem__(self, index):
         x, file, label, device, city = self.ds[index]
 
-        fsplit = file.rsplit("-", 1)
-        device = fsplit[1][:-4]
+        # fsplit = file.rsplit("-", 1)
+        # device = fsplit[1][:-4]
 
-        if device == "a" and torch.rand(1) < self.prob:
+        if device == 0 and torch.rand(1) < self.prob:
             # choose a DIR at random
             dir_idx = int(np.random.randint(0, len(self.dirs)))
             dir = self.dirs[dir_idx]
@@ -241,5 +241,5 @@ if __name__ == "__main__":
     test_sample = test_data[test_idx]
     for item in train_sample:
         print(item)
-    print(train_sample[0].shape)
-        
+    for item in test_sample:
+        print(item)

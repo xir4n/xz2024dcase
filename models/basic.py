@@ -52,6 +52,15 @@ class Basic(nn.Module):
                 skip_hps=True,
                 normalize=True,
             )
+            self.conv1d_lp = nn.Conv1d(
+                in_channels=C,
+                out_channels=C*Q2,
+                groups=C,
+                kernel_size=T1,
+                padding="same",
+                bias=False,                       
+            )
+
             self.layer2 = MuReNNDirect(
                 J=J2,
                 Q=Q2,
@@ -59,7 +68,7 @@ class Basic(nn.Module):
                 in_channels=C,
             )
             self.fc = nn.Linear(
-                in_features=C*(Q2*J2+1), # This is too big
+                in_features=C*Q2*(J2+1), # This is too big
                 out_features=10,
             )
 
@@ -90,6 +99,7 @@ class Basic(nn.Module):
         y = x_psis.view(B, C * Q * J, T) # B, C*Q2*J2, T
         if not self.skip_lp:
             x_phi, _ = self.phi2(x) #B, C, T 
+            x_phi = self.conv1d_lp(x_phi)
             y = torch.cat((y, x_phi), 1) # B, C*(Q2*J2+1), T
         y = torch.sum(y, dim=-1)
         logits = self.fc(y)
@@ -105,7 +115,7 @@ def get_model(
         n=1,
         mixstyle_p=0.5,
         mixstyle_alpha=0.2,
-        skip_lp=True,
+        skip_lp=False,
 ):
     config = {
         "alpha": alpha,

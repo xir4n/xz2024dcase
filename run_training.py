@@ -28,7 +28,7 @@ class PLModule(pl.LightningModule):
             beta=config.beta,
             mixstyle_p = config.mixstyle_p,
             mixstyle_alpha = config.mixstyle_alpha,
-            skip_lp=config.skip_lp
+            skip_lp=config.skip_lp,
         )
     
         self.device_ids = ['a', 'b', 'c', 's1', 's2', 's3', 's4', 's5', 's6']
@@ -72,8 +72,7 @@ class PLModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         # training_step defines the train loop.
         x, files, labels, devices, cities = batch
-
-        y_hat = self.model(x)
+        y_hat = self.forward(x)
         samples_loss = F.cross_entropy(y_hat, labels, reduction="none")
         loss = samples_loss.mean()
 
@@ -269,7 +268,7 @@ if __name__ == '__main__':
     parser.add_argument('--n', type=int, default=1)
     parser.add_argument('--J1', type=int, default=8)
     parser.add_argument('--J2', type=int, default=4)
-    parser.add_argument('--skip_lp', type=bool, default=True)
+    parser.add_argument('--skip_lp', type=bool, default=False)
 
     # augmentation
     parser.add_argument('--mixstyle_p', type=float, default=0.5)  # mixstyle
