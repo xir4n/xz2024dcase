@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from murenn import MuReNNDirect, DTCWT
+from murenn.dtcwt.utils import fix_length
 from .mixstyle import MixStyle
 
 
@@ -15,7 +16,7 @@ def initialize_weights(m):
             nn.init.zeros_(m.bias)
 
 
-class Basic(nn.Module):
+class MuReNN(nn.Module):
     def __init__(self, config):
         super().__init__()
         J1 = config["J1"]
@@ -31,19 +32,26 @@ class Basic(nn.Module):
 
 
         self.layer1 = MuReNNDirect(
-            J=J1,
-            Q=Q1,
-            T=T1,
-            in_channels=1,
+                J=J1,
+                Q=Q1,
+                T=T1,
+                in_channels=1,
         )
-
-        self.dirac = nn.Conv1d(
+        self.ln1 = nn.GroupNorm(1,J1*Q1)
+        self.bn1 = nn.BatchNorm1d(J1*Q1)
+        self.gn1 = nn.GroupNorm(J1,J1*Q1)
+        
+        
+        self.mix_channel = nn.Conv1d(
             in_channels=Q1*J1,
             out_channels=C,
             kernel_size=1,
             padding="same",
             bias=False,           
         )
+        self.ln2 = nn.GroupNorm(1,C*J2*Q2)
+        self.bn2 = nn.BatchNorm1d(C*J2*Q2)
+        self.gn2 = nn.GroupNorm(J2,C*J2*Q2)
 
         if not self.skip_lp:
             self.phi2 = DTCWT(
@@ -68,7 +76,7 @@ class Basic(nn.Module):
                 in_channels=C,
             )
             self.fc = nn.Linear(
-                in_features=C*Q2*(J2+1), # This is too big
+                in_features=C*Q2*(J2+1),
                 out_features=10,
             )
 
@@ -80,37 +88,40 @@ class Basic(nn.Module):
                 in_channels=C,
             )
             self.fc = nn.Linear(
-                in_features=C*Q2*J2, # This is too big
+                in_features=C*Q2*J2,
                 out_features=10,
+                 bias=False,
+                
             )
 
         self.mixstyle = MixStyle(p=mixstyle_p, alpha=mixstyle_alpha)
         self.apply(initialize_weights)
-
 
     def forward(self, x):
         x = self.layer1(x)
         x = self.mixstyle(x)
         B, C, Q, J, T = x.shape
         x = x.view(B, C * Q * J, T)
-        x = self.dirac(x)
+        # x = self.gn1(x)
+        x = self.mix_channel(x)
         x_psis = self.layer2(x) #B, C, Q2, J2, T
         B, C, Q, J, T = x_psis.shape
         y = x_psis.view(B, C * Q * J, T) # B, C*Q2*J2, T
+        # y = self.gn2(y)
         if not self.skip_lp:
             x_phi, _ = self.phi2(x) #B, C, T 
             x_phi = self.conv1d_lp(x_phi)
             y = torch.cat((y, x_phi), 1) # B, C*(Q2*J2+1), T
         y = torch.sum(y, dim=-1)
-        logits = self.fc(y)
-        return logits
+        y = self.fc(y)
+        return y
 
 
 def get_model(
         J1=8,
         J2=4,
-        alpha=10,
-        beta=30,
+        alpha=1,
+        beta=8,
         m=5,
         n=1,
         mixstyle_p=0.5,
@@ -128,8 +139,7 @@ def get_model(
         "mixstyle_alpha": mixstyle_alpha,
         "skip_lp": skip_lp,
     }
-    m = Basic(config)
-    return m
+    return MuReNN(config)
 
 if __name__ == "__main__":
     x = torch.zeros(1, 1, 2**14)

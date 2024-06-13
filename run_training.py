@@ -50,10 +50,9 @@ class PLModule(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(
+        optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.config.lr,
-            weight_decay=self.config.weight_decay,
         )
         scheduler = transformers.get_cosine_schedule_with_warmup(
             optimizer,
@@ -232,6 +231,7 @@ def train(config):
                             accelerator='gpu',
                             devices=1,
                             precision=config.precision,
+                            gradient_clip_val=0.5,
                             callbacks=[
                                 pl.callbacks.ModelCheckpoint(save_last=True),
                                 ModelSummary(max_depth=-1)
