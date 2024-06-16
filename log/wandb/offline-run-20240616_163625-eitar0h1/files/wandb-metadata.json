@@ -1,0 +1,44 @@
+{
+    "os": "macOS-14.1-arm64-arm-64bit",
+    "python": "3.10.13",
+    "heartbeatAt": "2024-06-16T14:36:25.382493",
+    "startedAt": "2024-06-16T14:36:25.312564",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--fast_dev_run",
+        "True",
+        "--batch_size",
+        "1",
+        "--single_layer",
+        "True"
+    ],
+    "state": "running",
+    "program": "/Users/zhang/dcase2024/xz2024dcase/run_training.py",
+    "codePathLocal": "run_training.py",
+    "codePath": "run_training.py",
+    "git": {
+        "remote": "https://github.com/xir4n/xz2024dcase.git",
+        "commit": "58b6b1388852e6b4f6b64445284c512aa7ba8a26"
+    },
+    "email": "xiranfr@gmail.com",
+    "root": "/Users/zhang/dcase2024/xz2024dcase",
+    "host": "pc-ls2n-zhang-macbook.local",
+    "username": "zhang",
+    "executable": "/Users/zhang/anaconda3/envs/dcase/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "disk": {
+        "/": {
+            "total": 460.4317207336426,
+            "used": 248.51222229003906
+        }
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 24.0
+    }
+}

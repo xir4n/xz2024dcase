@@ -11,7 +11,7 @@ import os
 
 from dataset.dcase24 import get_training_set, get_test_set, get_eval_set
 from helpers.init import worker_init_fn
-from models.basic import get_model, get_model_v
+from models.basic import get_model, get_model_v, get_layer
 from helpers import nessi
 
 
@@ -20,16 +20,10 @@ class PLModule(pl.LightningModule):
         super().__init__()
         self.config = config
         if config.single_layer:
-            self.model = get_model(
+            self.model = get_layer(
                 J1=config.J1,
-                J2=config.J2,
-                m=config.m,
-                n=config.n,
                 alpha=config.alpha,
                 beta=config.beta,
-                mixstyle_p = config.mixstyle_p,
-                mixstyle_alpha = config.mixstyle_alpha,
-                skip_lp=config.skip_lp,
             )            
         self.model = get_model_v(
             J1=config.J1,

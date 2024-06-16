@@ -164,7 +164,7 @@ class MuReL(nn.Module):
         )
         
         self.fc = nn.Linear(
-            in_features=J1*Q1*J1,
+            in_features=J1*Q1,
             out_features=10,
             bias=False,
             
@@ -213,7 +213,7 @@ def get_layer(
         "beta": beta, 
         "J1": J1,
     }
-    return MuReNN(config)
+    return MuReL(config)
 
 
 def get_model_v(
