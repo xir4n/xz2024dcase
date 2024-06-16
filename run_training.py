@@ -11,7 +11,7 @@ import os
 
 from dataset.dcase24 import get_training_set, get_test_set, get_eval_set
 from helpers.init import worker_init_fn
-from models.basic import get_model
+from models.basic import get_model, get_model_v
 from helpers import nessi
 
 
@@ -19,16 +19,23 @@ class PLModule(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.model = get_model(
+        if config.single_layer:
+            self.model = get_model(
+                J1=config.J1,
+                J2=config.J2,
+                m=config.m,
+                n=config.n,
+                alpha=config.alpha,
+                beta=config.beta,
+                mixstyle_p = config.mixstyle_p,
+                mixstyle_alpha = config.mixstyle_alpha,
+                skip_lp=config.skip_lp,
+            )            
+        self.model = get_model_v(
             J1=config.J1,
-            J2=config.J2,
-            m=config.m,
-            n=config.n,
             alpha=config.alpha,
             beta=config.beta,
-            mixstyle_p = config.mixstyle_p,
-            mixstyle_alpha = config.mixstyle_alpha,
-            skip_lp=config.skip_lp,
+            model=config.model,
         )
     
         self.device_ids = ['a', 'b', 'c', 's1', 's2', 's3', 's4', 's5', 's6']
@@ -269,6 +276,8 @@ if __name__ == '__main__':
     parser.add_argument('--J1', type=int, default=8)
     parser.add_argument('--J2', type=int, default=4)
     parser.add_argument('--skip_lp', type=bool, default=False)
+    parser.add_argument('--single_layer', type=bool, default=True)
+    parser.add_argument('--model', type=str, default="conv1d")
 
     # augmentation
     parser.add_argument('--mixstyle_p', type=float, default=0.5)  # mixstyle

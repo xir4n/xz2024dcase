@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from murenn import MuReNNDirect, DTCWT
+from murenn.dtcwt.nn import Conv1D_MuReNN, Strided_MuReNN, Dilated_MuReNN
 from murenn.dtcwt.utils import fix_length
 from .mixstyle import MixStyle
 
@@ -90,7 +91,7 @@ class MuReNN(nn.Module):
             self.fc = nn.Linear(
                 in_features=C*Q2*J2,
                 out_features=10,
-                 bias=False,
+                bias=False,
                 
             )
 
@@ -117,6 +118,65 @@ class MuReNN(nn.Module):
         return y
 
 
+class MurennV(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        J1 = config["J1"]
+        Q1 = config["alpha"]
+        T1 = config["beta"]
+        kwargs_1 = dict(J=J1, Q=Q1, T=T1, in_channels=1)
+#Conv1D_MuReNN, Strided_MuReNN, Dilated_MuReNN
+        if config["model"] == "conv1d":
+            self.layer1 = Conv1D_MuReNN(**kwargs_1)
+        if config["model"] == "stride":
+            self.layer1 = Strided_MuReNN(**kwargs_1)
+        if config["model"] == "dilate":
+            self.layer1 = Dilated_MuReNN(**kwargs_1)
+
+        self.fc = nn.Linear(
+            in_features=Q1*J1,
+            out_features=10,
+            bias=False,
+            
+        )
+        self.apply(initialize_weights)
+
+    def forward(self, x):
+        x = self.layer1(x) #channel : J*C_in*Q
+        x = torch.sum(x, dim=-1)
+        x = self.fc(x)
+        return x
+
+class MuReL(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        J1 = config["J1"]
+        Q1 = config["alpha"]
+        T1 = config["beta"]
+
+        self.layer1 = MuReNNDirect(
+                J=J1,
+                Q=Q1,
+                T=T1,
+                in_channels=1,
+        )
+        
+        self.fc = nn.Linear(
+            in_features=J1*Q1*J1,
+            out_features=10,
+            bias=False,
+            
+        )
+        self.apply(initialize_weights)
+
+    def forward(self, x):
+        x = self.layer1(x)
+        B, C, Q, J, T = x.shape
+        x = x.view(B, C * Q * J, T)
+        x = torch.sum(x, dim=-1)
+        x = self.fc(x)
+        return x
+
 def get_model(
         J1=8,
         J2=4,
@@ -141,9 +201,36 @@ def get_model(
     }
     return MuReNN(config)
 
+def get_layer(
+        J1=8,
+        alpha=1,
+        beta=8,
+):
+    config = {
+        "alpha": alpha,
+        "beta": beta, 
+        "J1": J1,
+    }
+    return MuReNN(config)
+
+
+def get_model_v(
+        J1=8,
+        alpha=1,
+        beta=8,
+        model="conv1d"
+):
+    config = {
+        "alpha": alpha,
+        "beta": beta, 
+        "J1": J1,
+        "model": model,
+    }
+    return MurennV(config)
+
 if __name__ == "__main__":
     x = torch.zeros(1, 1, 2**14)
-    m = get_model()
+    m = get_model_v()
     m.eval()
     y = m(x)
     print(y.shape)
