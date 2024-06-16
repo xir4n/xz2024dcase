@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from murenn import MuReNNDirect, DTCWT
-from murenn.dtcwt.nn import Conv1D_MuReNN, Strided_MuReNN, Dilated_MuReNN
+from murenn.dtcwt.nn import Conv1D_MuReNN, Strided_MuReNN, Dilated_MuReNN, Pooling_MuReNN
 from murenn.dtcwt.utils import fix_length
 from .mixstyle import MixStyle
 
@@ -132,6 +132,8 @@ class MurennV(nn.Module):
             self.layer1 = Strided_MuReNN(**kwargs_1)
         if config["model"] == "dilate":
             self.layer1 = Dilated_MuReNN(**kwargs_1)
+        if config["model"] == "pooling":
+            self.layer1 = Pooling_MuReNN(**kwargs_1)
 
         self.fc = nn.Linear(
             in_features=Q1*J1,
